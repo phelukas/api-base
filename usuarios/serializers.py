@@ -2,27 +2,6 @@ from rest_framework import serializers
 from .models import Usuario, Pessoa
 from core.serializers import EnderecoSerializer, TelefoneSerializer
 
-class UsuarioSerializer(serializers.ModelSerializer):
-    password = serializers.CharField()
-
-    class Meta:
-        model = Usuario
-        fields = ('email','password',)
-
-    def validate(self, attrs):
-
-        if Usuario.objects.filter(username=attrs['username']).exists():
-            raise serializers.ValidationError(
-                {"username": "username existente"})
-
-        return attrs
-
-    def create(self, validated_data, instance=None):
-        usuario = Usuario.objects.create(**validated_data)
-        usuario.set_password(validated_data['password'])
-        usuario.save()
-        return usuario
-
 class PessoaSerializer(serializers.ModelSerializer):
     endereco = EnderecoSerializer() 
     telefone = TelefoneSerializer() 
@@ -31,7 +10,25 @@ class PessoaSerializer(serializers.ModelSerializer):
         model = Pessoa
         fields = '__all__'
 
-class UsuarioAddSerializer(serializers.ModelSerializer):
+class AddUsuarioSerializer(serializers.ModelSerializer):
+    password = serializers.CharField()
+    pessoa = PessoaSerializer()
+
+    class Meta:
+        model = Usuario
+        fields = '__all__'
+
+    def create(self, validated_data, instance=None):
+        pessoa = validated_data.pop('pessoa')
+        # print("pessoa")
+        # print(pessoa)
+        # usuario = Usuario.objects.create(**validated_data)
+        # usuario.set_password(validated_data['password'])
+        # # usuario.save()
+        # return usuario
+
+
+class UsuarioSerializer(serializers.ModelSerializer):
 
     pessoa = PessoaSerializer()
 
@@ -48,10 +45,3 @@ class UsuarioAddSerializer(serializers.ModelSerializer):
             'date_joined': {'read_only': True},
             'user_permissions': {'read_only': True}
         }
-
-
-    
-
-
-
-
