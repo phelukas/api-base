@@ -48,15 +48,15 @@ class UUIDModel(models.Model):
         abstract = True
 
 
-class Telefone(TimeStampedModel):
+class Telefone(models.Model):
     telefone = models.CharField(verbose_name="Telefone", max_length=20, blank=True, null=True)
 
     def __str__(self) -> str:
         return f'{self.telefone}'
 
 
-class Endereco(TimeStampedModel):
-    rua = models.CharField(verbose_name="Endereço", max_length=100, blank=False, null=False)
+class Endereco(models.Model):
+    rua = models.CharField(verbose_name="Endereço", max_length=100, null=False, blank=False)
     estados = models.CharField(verbose_name="Estados", max_length=2, choices=ESTADOS_BRASIL, blank=False, null=False)
     cidade = models.CharField(verbose_name="Cidade", max_length=50, blank=False, null=False)
    
