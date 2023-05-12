@@ -131,4 +131,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     # YOUR SETTINGS
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # 'EXCEPTION_HANDLER': 'core.custom_validators.custom_exception_handler'
 }
+ 

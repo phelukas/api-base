@@ -1,6 +1,23 @@
 from rest_framework import serializers
 from .models import Usuario, Pessoa
 from core.serializers import EnderecoSerializer, TelefoneSerializer
+from rest_framework.exceptions import ValidationError
+
+# class MyValidationError(ValidationError):
+#     default_code = 'invalid'
+#     default_detail = 'Ocorreu um erro de validação.'
+
+#     def __init__(self, detail=None, code=None):
+#         if detail is not None:
+#             self.detail = detail
+#         else:
+#             self.detail = self.default_detail
+
+#         if code is not None:
+#             self.code = code
+#         else:
+#             self.code = self.default_code
+
 
 class PessoaSerializer(serializers.ModelSerializer):
 
@@ -14,8 +31,6 @@ class PessoaSerializer(serializers.ModelSerializer):
         validated_data['telefone_id'] = telefone
         validated_data['endereco_id'] = endereco
         return super().create(validated_data)
-
-
 class UsuarioSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -35,5 +50,4 @@ class AddUsuarioSerializer(serializers.Serializer):
     pessoa = PessoaSerializer()
     endereco = EnderecoSerializer() 
     telefone = TelefoneSerializer()
-
-
+    

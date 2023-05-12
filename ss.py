@@ -19,7 +19,54 @@ class UsuarioCreateView(ModelViewSet):
         pessoa_data = request.data['pessoa']
         endereco_data = request.data['endereco']
         telefone_data = request.data['telefone']
+    
+        try:
+            endereco = EnderecoSerializer(data=endereco_data)
+            endereco.is_valid(raise_exception=True)
+            endereco_obj = endereco.save()
+        except:
+            ...
+        try:
+            telefone = TelefoneSerializer(data=telefone_data)
+            telefone.is_valid(raise_exception=True)
+            telefone_obj = telefone.save()
+        except:
+            ...
+        try:
+                pessoa = PessoaSerializer(data=pessoa_data)
+                pessoa.is_valid(raise_exception=True)
+                pessoa_obj = pessoa.save()
+        except:
+             ...
+        
+        try:
+                usuario = UsuarioSerializer(data=usuario_data)
+                usuario.is_valid(raise_exception=True)
+                usuario.save()
+        except:
+             ...
 
+        try:
+            with transaction.atomic():
+                pessoa_data['telefone'] = telefone_obj.pk
+                pessoa_data['endereco'] = endereco_obj.pk
+                usuario_data['pessoa'] = pessoa_obj.pk
+                return Response({"status": "sucesso"}, status=status.HTTP_201_CREATED)
+            
+        except Exception as E:
+            print("erro qui")
+            print(E.detail)
+            print(type(E))
+            return Response(E.detail, status=status.HTTP_409_CONFLICT)
+
+
+
+
+
+
+
+
+def x():
         try:
             with transaction.atomic():
                 endereco = EnderecoSerializer(data=endereco_data)
@@ -40,5 +87,8 @@ class UsuarioCreateView(ModelViewSet):
                 return Response({"status": "sucesso"}, status=status.HTTP_201_CREATED)
             
         except Exception as E:
-            return Response(E, status=status.HTTP_409_CONFLICT)
+            print("erro qui")
+            print(E.detail)
+            print(type(E))
+            return Response(E.detail, status=status.HTTP_409_CONFLICT)
 
