@@ -3,34 +3,43 @@ from .models import Usuario, Pessoa
 from core.serializers import EnderecoSerializer, TelefoneSerializer
 from rest_framework.exceptions import ValidationError
 
-# class MyValidationError(ValidationError):
-#     default_code = 'invalid'
-#     default_detail = 'Ocorreu um erro de validação.'
+from rest_framework.validators import UniqueValidator
 
-#     def __init__(self, detail=None, code=None):
-#         if detail is not None:
-#             self.detail = detail
-#         else:
-#             self.detail = self.default_detail
+from rest_framework.validators import UniqueValidator
 
-#         if code is not None:
-#             self.code = code
-#         else:
-#             self.code = self.default_code
+class CustomUniqueValidator:
+    def __init__(self, queryset, message=None, lookup=None):
+        self.queryset = queryset
+        self.message = message or 'This field must be unique.'
+        self.lookup = lookup or 'exact'
 
+    def __call__(self, value):
+        filter_kwargs = {self.field_name: value}
 
+        if self.queryset.filter(**filter_kwargs).exists():
+            raise serializers.ValidationError(self.message)
+
+# Uso do CustomUniqueValidator no 
 class PessoaSerializer(serializers.ModelSerializer):
+    # cpf = serializers.CharField(validators=[CustomUniqueValidator(queryset=Pessoa.objects.all())])
 
+    
     class Meta:
+        
         model = Pessoa
         fields = ('primeiro_nome', 'sobre_nome', 'cpf')
+
+    def custom_name():
+        return "gabriel"
 
     def create(self, validated_data):
         telefone = self.initial_data['telefone']
         endereco = self.initial_data['endereco']
         validated_data['telefone_id'] = telefone
         validated_data['endereco_id'] = endereco
+        print("validação de pessoa")
         return super().create(validated_data)
+
 class UsuarioSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -50,4 +59,8 @@ class AddUsuarioSerializer(serializers.Serializer):
     pessoa = PessoaSerializer()
     endereco = EnderecoSerializer() 
     telefone = TelefoneSerializer()
+
+    def validate(self, attrs):
+        print("estou aqui na validações")
+        return super().validate(attrs)
     
