@@ -1,7 +1,7 @@
 import re
-from typing import Iterable, Optional
+from core.utils import make_change_dict
 from django.contrib.auth.models import AbstractUser
-from core.models import TimeStampedModel, Telefone, Endereco
+from core.models import Telefone, Endereco
 from django.db import models
 from django.db import IntegrityError
 
@@ -13,6 +13,21 @@ class Pessoa(models.Model):
     
     telefone = models.ForeignKey(Telefone, related_name="pessoa_telefone", on_delete=models.CASCADE)
     endereco = models.OneToOneField(Endereco, related_name='endereco_pessoa', on_delete=models.CASCADE)
+
+    @property
+    def get_pessoa(self):
+        fields = [
+            'primeiro_nome', 
+            'sobre_nome',
+            'cpf',
+            'telefone',
+            'endereco'
+        ]
+
+        return make_change_dict(self, fields)
+    
+    def __str__(self):
+        return self.cpf
 
     def get_full_name(self):
         """Nome complete do usuario"""
@@ -41,6 +56,17 @@ class Usuario(AbstractUser):
     def __str__(self):
         return self.email
     
+    @property
+    def get_usuario(self):
+        fields = [
+            'id', 
+            'email',
+            'pessoa'
+        ]
+
+        return make_change_dict(self, fields)
+
+
     def save(self, *args, **kwargs):
         if len(self.email) == 0:
             raise IntegrityError("E-mail é obrigatorio")

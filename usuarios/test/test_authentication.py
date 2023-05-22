@@ -21,7 +21,6 @@ def test_endereco_create():
         cidade="Natal"
     )
     assert Endereco.objects.count() == 1
-
 @pytest.mark.django_db
 def test_pessoa_create():
     endereco = Endereco.objects.create(
@@ -115,13 +114,20 @@ def test_create_person_with_existing_cpf(create_pessoa, create_endereco, create_
             endereco=create_endereco
         )
 
+@pytest.mark.django_db
+def test_get_user_status_code_200(api_client, create_usuario):
+    response = api_client.get('/api/usuarios/')
+    assert response.status_code == 200
 
-# @pytest.mark.django_db
-# def test_get_obj()
 
-
-
-    
+@pytest.mark.django_db
+def test_get_user_payload(api_client, payload_modelo, create_usuario):
+    response = api_client.get('/api/usuarios/')
+    print("*"*89)
+    print(Usuario.objects.all())
+    print("*"*89)
+    print(response.json())
+    assert 1 == 0
 
 
 

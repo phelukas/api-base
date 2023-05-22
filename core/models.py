@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from django.forms.models import model_to_dict
 
 ESTADOS_BRASIL = (
     ('AC', 'Acre'),
@@ -52,7 +53,11 @@ class Telefone(models.Model):
     telefone = models.CharField(verbose_name="Telefone", max_length=20, blank=True, null=True)
 
     def __str__(self) -> str:
-        return f'{self.telefone}'
+        return self.telefone
+    
+    @property
+    def get_telefone(self):
+        return model_to_dict(self)
 
 
 class Endereco(models.Model):
@@ -61,4 +66,8 @@ class Endereco(models.Model):
     cidade = models.CharField(verbose_name="Cidade", max_length=50, blank=False, null=False)
    
     def __str__(self) -> str:
-        return f'{self.rua}'
+        return f'Rua:{self.rua} - Cidade:{self.cidade} - Estado:{self.estados}'
+    
+    @property
+    def get_endereco(self):
+        return model_to_dict(self)

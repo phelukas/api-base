@@ -71,3 +71,46 @@ def create_usuario():
     )
     return usuario
 
+
+@pytest.fixture
+def payload_modelo():
+    payload_modelo = {
+        "usuario": {
+            "id": "",
+            "email": "",
+            "pessoa": ""
+        },
+        "pessoa": {
+            "primeiro_nome": "",
+            "sobre_nome": "",
+            "cpf": "",
+            "telefone": "",
+            "endereco": ""
+        },
+        "endereco": {
+            "id": "",
+            "rua": "",
+            "estados": "",
+            "cidade": ""
+        },
+        "telefone": {
+            "id": "",
+            "telefone": ""
+        }
+    }
+    return payload_modelo
+
+
+def comparar_chaves(dicionario1, dicionario2):
+    if sorted(dicionario1.keys()) != sorted(dicionario2.keys()):
+        return False
+
+    for chave in dicionario1.keys():
+        valor1 = dicionario1[chave]
+        valor2 = dicionario2[chave]
+
+        if isinstance(valor1, dict) and isinstance(valor2, dict):
+            if not comparar_chaves(valor1, valor2):
+                return False
+
+    return True

@@ -1,43 +1,19 @@
 from rest_framework import serializers
 from .models import Usuario, Pessoa
 from core.serializers import EnderecoSerializer, TelefoneSerializer
-from rest_framework.exceptions import ValidationError
 
-from rest_framework.validators import UniqueValidator
 
-from rest_framework.validators import UniqueValidator
-
-class CustomUniqueValidator:
-    def __init__(self, queryset, message=None, lookup=None):
-        self.queryset = queryset
-        self.message = message or 'This field must be unique.'
-        self.lookup = lookup or 'exact'
-
-    def __call__(self, value):
-        filter_kwargs = {self.field_name: value}
-
-        if self.queryset.filter(**filter_kwargs).exists():
-            raise serializers.ValidationError(self.message)
-
-# Uso do CustomUniqueValidator no 
 class PessoaSerializer(serializers.ModelSerializer):
-    # cpf = serializers.CharField(validators=[CustomUniqueValidator(queryset=Pessoa.objects.all())])
 
-    
     class Meta:
-        
         model = Pessoa
         fields = ('primeiro_nome', 'sobre_nome', 'cpf')
-
-    def custom_name():
-        return "gabriel"
 
     def create(self, validated_data):
         telefone = self.initial_data['telefone']
         endereco = self.initial_data['endereco']
         validated_data['telefone_id'] = telefone
         validated_data['endereco_id'] = endereco
-        print("validação de pessoa")
         return super().create(validated_data)
 
 class UsuarioSerializer(serializers.ModelSerializer):
@@ -60,7 +36,48 @@ class AddUsuarioSerializer(serializers.Serializer):
     endereco = EnderecoSerializer() 
     telefone = TelefoneSerializer()
 
-    def validate(self, attrs):
-        print("estou aqui na validações")
-        return super().validate(attrs)
+    def to_representation(self, instance):
+        pessoa_obj = instance.pessoa
+        resp = {
+            "usuario": instance.get_usuario,
+            "pessoa": pessoa_obj.get_pessoa,
+            "endereco": pessoa_obj.endereco.get_endereco,
+            "telefone": pessoa_obj.telefone.get_telefone
+        }
+
+        return resp
     
+    def create(self, validated_data):
+        usuario_data = validated_data['usuario']
+        pessoa_data = validated_data['pessoa']
+        endereco_data = validated_data['endereco']
+        telefone_data = validated_data['telefone']
+
+        endereco_serializer = EnderecoSerializer(data=endereco_data)
+        telefone_serializer = TelefoneSerializer(data=telefone_data)
+        pessoa_serializer = PessoaSerializer(data=pessoa_data)
+        usuario_serializer = UsuarioSerializer(data=usuario_data)
+
+        if (
+            endereco_serializer.is_valid() and
+            telefone_serializer.is_valid() and
+            pessoa_serializer.is_valid() and
+            usuario_serializer.is_valid()
+        ):
+            endereco_obj = endereco_serializer.save()
+            telefone_obj = telefone_serializer.save()
+            pessoa_data['endereco'] = endereco_obj.pk
+            pessoa_data['telefone'] = telefone_obj.pk
+            pessoa_obj = pessoa_serializer.save()
+            usuario_data['pessoa'] = pessoa_obj.pk
+            obj = usuario_serializer.save()
+
+            return obj
+
+        raise serializers.ValidationError({
+            'error': 'Erros de validação',
+            'endereco_errors': endereco_serializer.errors,
+            'telefone_errors': telefone_serializer.errors,
+            'pessoa_errors': pessoa_serializer.errors,
+            'usuario_errors': usuario_serializer.errors
+        })
