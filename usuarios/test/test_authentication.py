@@ -1,6 +1,5 @@
 import pytest
-from  rest_framework.test import APIClient
-from rest_framework.reverse import reverse
+from usuarios.test.conftest import comparar_chaves
 from usuarios.models import Usuario, Pessoa
 from core.models import Telefone, Endereco
 from django.db.utils import IntegrityError
@@ -114,20 +113,16 @@ def test_create_person_with_existing_cpf(create_pessoa, create_endereco, create_
             endereco=create_endereco
         )
 
+# verificar se retorna status code 200
 @pytest.mark.django_db
 def test_get_user_status_code_200(api_client, create_usuario):
     response = api_client.get('/api/usuarios/')
     assert response.status_code == 200
 
 
+# verficar se o payload do get retorna os campos 
 @pytest.mark.django_db
 def test_get_user_payload(api_client, payload_modelo, create_usuario):
-    response = api_client.get('/api/usuarios/')
-    print("*"*89)
-    print(Usuario.objects.all())
-    print("*"*89)
-    print(response.json())
-    assert 1 == 0
-
-
+    payload_get = api_client.get('/api/usuarios/').json()[0]
+    assert comparar_chaves(payload_modelo, payload_get) == True
 
