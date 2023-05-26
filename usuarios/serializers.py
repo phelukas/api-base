@@ -81,3 +81,38 @@ class AddUsuarioSerializer(serializers.Serializer):
             'pessoa_errors': pessoa_serializer.errors,
             'usuario_errors': usuario_serializer.errors
         })
+    
+    def update(self, instance, validated_data):
+        usuario_data = validated_data.get('usuario', instance)
+        pessoa_data = validated_data.get('pessoa', instance.pessoa)
+        endereco_data = validated_data.get('endereco', instance.pessoa.endereco)
+        telefone_data = validated_data.get('telefone', instance.pessoa.telefone)
+
+        endereco_serializer = EnderecoSerializer(instance.pessoa.endereco, data=endereco_data)
+        telefone_serializer = TelefoneSerializer(instance.pessoa.telefone, data=telefone_data)
+        pessoa_serializer = PessoaSerializer(instance.pessoa, data=pessoa_data)
+        usuario_serializer = UsuarioSerializer(instance, data=usuario_data)
+
+        if (
+            endereco_serializer.is_valid() and
+            telefone_serializer.is_valid() and
+            pessoa_serializer.is_valid() and
+            usuario_serializer.is_valid()
+        ):
+            endereco_obj = endereco_serializer.save()
+            telefone_obj = telefone_serializer.save()
+            pessoa_data['endereco'] = endereco_obj.pk
+            pessoa_data['telefone'] = telefone_obj.pk
+            pessoa_obj = pessoa_serializer.save()
+            usuario_data['pessoa'] = pessoa_obj.pk
+            obj = usuario_serializer.save()
+
+            return obj
+
+        raise serializers.ValidationError({
+            'error': 'Erros de validação',
+            'endereco_errors': endereco_serializer.errors,
+            'telefone_errors': telefone_serializer.errors,
+            'pessoa_errors': pessoa_serializer.errors,
+            'usuario_errors': usuario_serializer.errors
+        })

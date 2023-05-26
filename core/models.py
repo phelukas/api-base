@@ -50,7 +50,7 @@ class UUIDModel(models.Model):
 
 
 class Telefone(models.Model):
-    telefone = models.CharField(verbose_name="Telefone", max_length=20, blank=True, null=True)
+    telefone = models.CharField(verbose_name="Telefone", max_length=100, blank=True, null=True)
 
     def __str__(self) -> str:
         return self.telefone

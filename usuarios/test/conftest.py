@@ -63,7 +63,7 @@ def create_usuario():
 @pytest.fixture
 def payload_modelo():
     payload_modelo = {
-        "usuario": {"id": "", "email": "", "pessoa": ""},
+        "usuario": {"id": "", "email": ""},
         "pessoa": {"id": "", "primeiro_nome": "", "sobre_nome": "", "cpf": ""},
         "endereco": {"id": "", "rua": "", "estados": "", "cidade": ""},
         "telefone": {"id": "", "telefone": ""},
@@ -145,14 +145,39 @@ def comparar_dicionarios(dicionario1, dicionario2, caminho=""):
 def gerar_cpf():
     cpf = [random.randint(0, 9) for _ in range(9)]
 
-    # Calcula o primeiro dígito verificador
     soma = sum((valor * (i + 1)) for i, valor in enumerate(cpf))
     digito1 = (soma % 11) % 10
     cpf.append(digito1)
 
-    # Calcula o segundo dígito verificador
     soma = sum((valor * i) for i, valor in enumerate(cpf[::-1])) + (digito1 * 9)
     digito2 = (soma % 11) % 10
     cpf.append(digito2)
 
     return "".join(str(d) for d in cpf)
+
+def remover_chave(dicionario):
+    chaves = dicionario.keys()
+    lista_dicionarios = []
+    
+    for chave in chaves:
+        dicionario_modificado = dicionario.copy()
+        dicionario_modificado.pop(chave)
+        lista_dicionarios.append(dicionario_modificado)
+    
+    return lista_dicionarios
+
+import itertools
+
+def gerar_combinacoes(dicionario):
+    chaves = dicionario.keys()
+    combinacoes = []
+
+    for r in range(1, len(chaves) + 1):
+        for combinacao in itertools.combinations(chaves, r):
+            novo_dicionario = {}
+            for chave in combinacao:
+                novo_dicionario[chave] = dicionario[chave]
+            combinacoes.append(novo_dicionario)
+
+    return combinacoes
+

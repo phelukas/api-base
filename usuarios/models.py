@@ -11,7 +11,7 @@ class Pessoa(models.Model):
         verbose_name="Primeiro nome", max_length=100, blank=False, null=False
     )
     sobre_nome = models.CharField(
-        verbose_name="Segundo nome", max_length=20, blank=False, null=False
+        verbose_name="Segundo nome", max_length=1000, blank=False, null=False
     )
     cpf = models.CharField(
         verbose_name="cpf", max_length=15, unique=True, blank=False, null=False
@@ -67,7 +67,7 @@ class Usuario(AbstractUser):
 
     @property
     def get_usuario(self):
-        fields = ["id", "email", "pessoa"]
+        fields = ["id", "email"]
 
         return make_change_dict(self, fields)
 

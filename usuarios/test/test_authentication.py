@@ -1,13 +1,13 @@
-import pytest
-from usuarios.test.conftest import comparar_chaves, comparar_dicionarios, gerar_cpf
+from usuarios.test.conftest import comparar_chaves, comparar_dicionarios, gerar_cpf, remover_chave,gerar_combinacoes 
+from django.contrib.auth.hashers import check_password
 from usuarios.models import Usuario, Pessoa
 from core.models import Telefone, Endereco
 from django.db.utils import IntegrityError
-from django.contrib.auth.hashers import check_password
-from faker import Faker
 from core.models import ESTADOS_BRASIL
+from faker import Faker
 import random
 import string
+import pytest
 
 
 @pytest.mark.django_db
@@ -169,8 +169,6 @@ def test_post_save_user_right_fields(api_client, payload_modelo_preenchido):
 
 # verficar se o PUT retorna status code 200
 fake = Faker()
-
-
 @pytest.mark.django_db
 def test_check_if_put_returns_status_code_200(api_client, create_usuario):
     caracteres = string.ascii_letters + string.digits
@@ -184,11 +182,12 @@ def test_check_if_put_returns_status_code_200(api_client, create_usuario):
         },
         "endereco": {
             "rua": fake.address(),
-            "estados": random.choice(ESTADOS_BRASIL),
+            "estados": random.choice(ESTADOS_BRASIL)[0],
             "cidade": fake.city(),
         },
         "telefone": {"telefone": fake.phone_number()},
     }
+
     response = api_client.put(
         f"/api/usuarios/{create_usuario.id}/", data=payload, format="json"
     )
@@ -197,7 +196,71 @@ def test_check_if_put_returns_status_code_200(api_client, create_usuario):
 
 
 # verficar se o PUT alterou so os campos passados
-# @pytest.mark.django_db
-# def check_if_the_put_changed_only_the_fields_passed(api_client, create_usuario):
-#     user = Usuario.objects.get(id=1)
-#     response = api_client.put("/api/usuarios/", data=)
+@pytest.mark.django_db
+def test_check_if_the_put_changed_only_the_fields_passed(api_client, create_usuario):
+    caracteres = string.ascii_letters + string.digits
+    senha = "".join(random.choice(caracteres) for _ in range(10))
+    payload = {
+        "usuario": {"id":1,"email": fake.email(), "password": senha},
+        "pessoa": {
+            "id":1,
+            "primeiro_nome": fake.name(),
+            "sobre_nome": fake.name(),
+            "cpf": gerar_cpf(),
+        },
+        "endereco": {
+            "id":1,
+            "rua": fake.address(),
+            "estados": random.choice(ESTADOS_BRASIL)[0],
+            "cidade": fake.city(),
+        },
+        "telefone": {"id":1,"telefone": fake.phone_number()},
+    }
+    api_client.put(f"/api/usuarios/{create_usuario.id}/", data=payload, format="json")
+    payload_get_depois = api_client.get("/api/usuarios/").json()[0]
+    del payload['usuario']['password']
+    comparar = comparar_dicionarios(payload, payload_get_depois)
+    
+    assert comparar == [], comparar
+
+# verficar se o PATCH retorna status code 200
+@pytest.mark.django_db
+def test_check_if_patch_returns_status_code_200(api_client, payload_modelo_preenchido):
+    print(".")
+    caracteres = string.ascii_letters + string.digits
+    senha = "".join(random.choice(caracteres) for _ in range(10))
+    payload = {
+        "usuario": {"email": fake.email(), "password": senha},
+        "pessoa": {
+            "primeiro_nome": fake.name(),
+            "sobre_nome": fake.name(),
+            "cpf": gerar_cpf(),
+        },
+        "endereco": {
+            "rua": fake.address(),
+            "estados": random.choice(ESTADOS_BRASIL)[0],
+            "cidade": fake.city(),
+        },
+        "telefone": {"telefone": fake.phone_number()},
+    }
+    dicionarios_list = gerar_combinacoes(payload)
+    print("dicionarios_list")
+    for i in dicionarios_list:
+        print(i)
+        
+
+
+    
+
+
+    # for i in gerar_combinacoes(payload_modelo_preenchido):
+    #     print(i)
+
+
+
+
+
+# @pytest.mark.parametrize("test_input,expected", [("3+5", 8), ("2+4", 6), ("6*9", 42)])
+# def test_eval(test_input, expected):
+#     assert eval(test_input) == expected
+# verficar se o PATCH alterou so os campos passados
