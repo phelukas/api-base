@@ -1,3 +1,4 @@
+import random
 import pytest
 from collections import namedtuple
 from rest_framework.test import APIClient
@@ -63,13 +64,7 @@ def create_usuario():
 def payload_modelo():
     payload_modelo = {
         "usuario": {"id": "", "email": "", "pessoa": ""},
-        "pessoa": {
-            "primeiro_nome": "",
-            "sobre_nome": "",
-            "cpf": "",
-            "telefone": "",
-            "endereco": "",
-        },
+        "pessoa": {"id": "", "primeiro_nome": "", "sobre_nome": "", "cpf": ""},
         "endereco": {"id": "", "rua": "", "estados": "", "cidade": ""},
         "telefone": {"id": "", "telefone": ""},
     }
@@ -91,44 +86,28 @@ def payload_modelo_preenchido():
     return payload_modelo_preenchido
 
 
-def comparar_chaves(dicionario1, dicionario2):
+def comparar_chaves(dicionario1, dicionario2, caminho=""):
     chaves_diferentes = []
 
-    if sorted(dicionario1.keys()) != sorted(dicionario2.keys()):
-        return list(set(dicionario1.keys()) ^ set(dicionario2.keys()))
-
-    for chave in dicionario1.keys():
-        valor1 = dicionario1[chave]
-        valor2 = dicionario2[chave]
-
-        if isinstance(valor1, dict) and isinstance(valor2, dict):
-            chaves_sub_diferentes = comparar_chaves(valor1, valor2)
-            if chaves_sub_diferentes:
-                chaves_diferentes.extend(
-                    [f"{chave}.{sub_chave}" for sub_chave in chaves_sub_diferentes]
+    for chave in dicionario1:
+        novo_caminho = caminho + "." + chave if caminho else chave
+        if chave not in dicionario2:
+            chaves_diferentes.append(novo_caminho)
+        elif isinstance(dicionario1[chave], dict) and isinstance(
+            dicionario2[chave], dict
+        ):
+            chaves_diferentes.extend(
+                comparar_chaves(
+                    dicionario1[chave], dicionario2[chave], caminho=novo_caminho
                 )
-        elif valor1 != valor2:
-            chaves_diferentes.append(chave)
+            )
 
-    print("TTTTT")
-    print(chaves_diferentes)
+    for chave in dicionario2:
+        novo_caminho = caminho + "." + chave if caminho else chave
+        if chave not in dicionario1:
+            chaves_diferentes.append(novo_caminho)
 
     return chaves_diferentes
-
-
-# def comparar_chaves(dicionario1, dicionario2):
-#     if sorted(dicionario1.keys()) != sorted(dicionario2.keys()):
-#         return False
-
-#     for chave in dicionario1.keys():
-#         valor1 = dicionario1[chave]
-#         valor2 = dicionario2[chave]
-
-#         if isinstance(valor1, dict) and isinstance(valor2, dict):
-#             if not comparar_chaves(valor1, valor2):
-#                 return False
-
-#     return True
 
 
 def comparar_dicionarios(dicionario1, dicionario2, caminho=""):
@@ -161,3 +140,19 @@ def comparar_dicionarios(dicionario1, dicionario2, caminho=""):
         campos_diferentes = [Erro(*tupla) for tupla in campos_diferentes]
 
     return campos_diferentes
+
+
+def gerar_cpf():
+    cpf = [random.randint(0, 9) for _ in range(9)]
+
+    # Calcula o primeiro dígito verificador
+    soma = sum((valor * (i + 1)) for i, valor in enumerate(cpf))
+    digito1 = (soma % 11) % 10
+    cpf.append(digito1)
+
+    # Calcula o segundo dígito verificador
+    soma = sum((valor * i) for i, valor in enumerate(cpf[::-1])) + (digito1 * 9)
+    digito2 = (soma % 11) % 10
+    cpf.append(digito2)
+
+    return "".join(str(d) for d in cpf)

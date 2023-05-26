@@ -26,7 +26,7 @@ class Pessoa(models.Model):
 
     @property
     def get_pessoa(self):
-        fields = ["primeiro_nome", "sobre_nome", "cpf", "telefone", "endereco"]
+        fields = ["id", "primeiro_nome", "sobre_nome", "cpf"]
 
         return make_change_dict(self, fields)
 

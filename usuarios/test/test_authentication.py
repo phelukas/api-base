@@ -1,9 +1,13 @@
 import pytest
-from usuarios.test.conftest import comparar_chaves, comparar_dicionarios
+from usuarios.test.conftest import comparar_chaves, comparar_dicionarios, gerar_cpf
 from usuarios.models import Usuario, Pessoa
 from core.models import Telefone, Endereco
 from django.db.utils import IntegrityError
 from django.contrib.auth.hashers import check_password
+from faker import Faker
+from core.models import ESTADOS_BRASIL
+import random
+import string
 
 
 @pytest.mark.django_db
@@ -163,4 +167,37 @@ def test_post_save_user_right_fields(api_client, payload_modelo_preenchido):
     assert comparacao == [], comparacao
 
 
-##
+# verficar se o PUT retorna status code 200
+fake = Faker()
+
+
+@pytest.mark.django_db
+def test_check_if_put_returns_status_code_200(api_client, create_usuario):
+    caracteres = string.ascii_letters + string.digits
+    senha = "".join(random.choice(caracteres) for _ in range(10))
+    payload = {
+        "usuario": {"email": fake.email(), "password": senha},
+        "pessoa": {
+            "primeiro_nome": fake.name(),
+            "sobre_nome": fake.name(),
+            "cpf": gerar_cpf(),
+        },
+        "endereco": {
+            "rua": fake.address(),
+            "estados": random.choice(ESTADOS_BRASIL),
+            "cidade": fake.city(),
+        },
+        "telefone": {"telefone": fake.phone_number()},
+    }
+    response = api_client.put(
+        f"/api/usuarios/{create_usuario.id}/", data=payload, format="json"
+    )
+
+    assert response.status_code == 200, response.json()
+
+
+# verficar se o PUT alterou so os campos passados
+# @pytest.mark.django_db
+# def check_if_the_put_changed_only_the_fields_passed(api_client, create_usuario):
+#     user = Usuario.objects.get(id=1)
+#     response = api_client.put("/api/usuarios/", data=)
