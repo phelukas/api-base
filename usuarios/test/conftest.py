@@ -155,18 +155,21 @@ def gerar_cpf():
 
     return "".join(str(d) for d in cpf)
 
+
 def remover_chave(dicionario):
     chaves = dicionario.keys()
     lista_dicionarios = []
-    
+
     for chave in chaves:
         dicionario_modificado = dicionario.copy()
         dicionario_modificado.pop(chave)
         lista_dicionarios.append(dicionario_modificado)
-    
+
     return lista_dicionarios
 
+
 import itertools
+
 
 def gerar_combinacoes(dicionario):
     chaves = dicionario.keys()
@@ -180,4 +183,3 @@ def gerar_combinacoes(dicionario):
             combinacoes.append(novo_dicionario)
 
     return combinacoes
-
