@@ -87,13 +87,15 @@ class AddUsuarioSerializer(serializers.Serializer):
         )
 
     def update(self, instance, validated_data):
-        print("estou aqui")
-        print(instance.pessoa)
         usuario_data = validated_data.get("usuario", instance)
         pessoa_data = validated_data.get("pessoa", instance.pessoa)
         endereco_data = validated_data.get("endereco", instance.pessoa.endereco)
         telefone_data = validated_data.get("telefone", instance.pessoa.telefone)
-        print("TELEFONE DATA")
+
+        print(usuario_data)
+        print(pessoa_data)
+        print(endereco_data)
+        print(type(telefone_data))
 
         endereco_serializer = EnderecoSerializer(
             instance.pessoa.endereco, data=endereco_data, partial=True
@@ -107,7 +109,6 @@ class AddUsuarioSerializer(serializers.Serializer):
         usuario_serializer = UsuarioSerializer(
             instance, data=usuario_data, partial=True
         )
-        print("ESTOU AQUIIIIIIIIIIIII")
 
         is_endereco_valid = endereco_serializer.is_valid()
         is_telefone_valid = telefone_serializer.is_valid()

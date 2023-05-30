@@ -255,9 +255,6 @@ def test_check_if_patch_returns_status_code_200(api_client, create_usuario):
     response = api_client.patch(
         f"/api/usuarios/{create_usuario.id}/", data=payload, format="json"
     )
-    print("¨" * 78)
-    print(response.json())
-    print("¨" * 78)
     assert response.status_code == 200, response.json()
 
 
